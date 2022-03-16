@@ -1,0 +1,35 @@
+class NextCardListener implements ActionListener {
+    @Override
+    public static void actionPerformed(ActionEvent e) {
+        FlashCard card = new FlashCard(question.getText(), answer.getText());
+        cardList.add(card);
+        clearCard();
+    }
+}
+
+    class SaveMenuListener implements ActionListener {
+        @Override
+        public static void actionPerformed(ActionEvent e) {
+            FlashCard card = new FlashCard(question.getText(), answer.getText());
+            cardList.add(card);
+            JFileChooser fileSave = new JFileChooser();
+            fileSave.showSaveDialog(frame);
+            saveFile(fileSave.getSelectedFile());
+        }
+    
+
+        private void saveFile(File selectedFile) {
+            try {
+                BufferedWriter writer = new BufferedWriter(new FileWriter(selectedFile));
+
+                for( FlashCard card : cardList) {
+                    writer.write(card.getQuestion() + " /");
+                    writer.write(card.getAnswer() + "\n");
+                }
+                writer.close();
+            } catch (Exception e) {
+                System.out.println("Error: Couldn't write to file.");
+                e.printStackTrace();
+            }
+        }
+    }
