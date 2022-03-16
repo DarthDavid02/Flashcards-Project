@@ -1,6 +1,14 @@
 
-import java.awt.Insets;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.util.ArrayList;
+import javax.swing.DefaultListModel;
+import javax.swing.JFileChooser;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
 
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
@@ -16,26 +24,41 @@ public class FlashCards extends javax.swing.JFrame {
     /**
      * Creates new form FlashCards
      */
-    //side = 0 = Question ... side = 1 = Answer
-    private String [][] card = {{"4 + 4 =", "8"},{"What is The meaning of Life?", "42"},{"Who's the best?", "You are!"},
-        {"What is a super random fact that absolutely no one would ever even know in their lives" + '\n' + "except that one person who would know it?", "The cake is a lie"}};
+    
+//side = 0 = Question ... side = 1 = Answer
+
+//    private String [][] card = {{"4 + 4 =", "8"},{"What is The meaning of Life?", "42"},{"Who's the best?", "You are!"},
+//        {"What is a super random fact that absolutely no one would ever even know in their lives" + '\n' + "except that one person who would know it?", "The cake is a lie"}};
     private ArrayList <String[]> flashCards = new ArrayList<String[]>();
     private int cardCount = 0;
     boolean isFlipped = false;
+    private DefaultListModel <String> cardList = new DefaultListModel<String>();
     public FlashCards() {
         initComponents();
-        makeCardList();
-        showCard(0);
-        checkVis();
+        //makeCardList();
+       this.submittedArea.setModel(cardList);
+       this.clearDisplayFrame();
     }
-    
-    public void makeCardList()
+    //Since the display and maker frames share an ArrayList, this clears and resets the frame
+    //that displays the flashcards
+    private void clearDisplayFrame()
     {
-       for(int i = 0; i < card.length; i++)
-       {
-           flashCards.add(card[i]);
-       }
+       cardNumLabel.setVisible(false);
+       nextBtn.setVisible(false);
+       prevBtn.setVisible(false);
+       flashCardBtn.setText("");
+       cardCount=0;
+       flashCards.clear();
+//       ArrayList <String[]> temp = new ArrayList<String[]>();
+//       flashCards = temp;
     }
+//    public void makeCardList()
+//    {
+//       for(int i = 0; i < card.length; i++)
+//       {
+//           flashCards.add(card[i]);
+//       }
+//    }
 
     public void checkVis()
     {
@@ -58,6 +81,16 @@ public class FlashCards extends javax.swing.JFrame {
       {
         prevBtn.setVisible(true);
       }
+      
+      //hide the undo button when arrayList is empty to stop user from going out of bounds
+        if(flashCards.isEmpty())
+        {
+            removeBtn.setVisible(false);
+        }
+        else
+        {
+            removeBtn.setVisible(true);
+        }
         
     }
     public void showCard(int side)
@@ -74,11 +107,174 @@ public class FlashCards extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        cardMakerFrame = new javax.swing.JFrame();
+        QuestionLabel = new javax.swing.JLabel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        enterCardInfoQ = new javax.swing.JTextArea();
+        submittedCardsLabel = new javax.swing.JLabel();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        enterCardInfoA = new javax.swing.JTextArea();
+        AnswerLabel = new javax.swing.JLabel();
+        removeBtn = new javax.swing.JButton();
+        addBtn = new javax.swing.JButton();
+        jScrollPane5 = new javax.swing.JScrollPane();
+        submittedArea = new javax.swing.JList<>();
+        menuBar = new javax.swing.JMenuBar();
+        jMenu2 = new javax.swing.JMenu();
+        menuItemSave = new javax.swing.JMenuItem();
+        saveFileFrame = new javax.swing.JFrame();
+        openFileFrame = new javax.swing.JFrame();
         prevBtn = new javax.swing.JButton();
         nextBtn = new javax.swing.JButton();
         cardNumLabel = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         flashCardBtn = new javax.swing.JTextArea();
+        jMenuBar1 = new javax.swing.JMenuBar();
+        jMenu1 = new javax.swing.JMenu();
+        openMenuItem = new javax.swing.JMenuItem();
+        cardMaker = new javax.swing.JMenu();
+        cardMakerItem = new javax.swing.JMenuItem();
+
+        cardMakerFrame.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        cardMakerFrame.setTitle("Card Maker");
+        cardMakerFrame.setAlwaysOnTop(true);
+        cardMakerFrame.setMinimumSize(new java.awt.Dimension(737, 650));
+        cardMakerFrame.addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                cardMakerFrameWindowClosing(evt);
+            }
+        });
+
+        QuestionLabel.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        QuestionLabel.setText("Question");
+
+        jScrollPane2.setViewportBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+
+        enterCardInfoQ.setColumns(20);
+        enterCardInfoQ.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
+        enterCardInfoQ.setLineWrap(true);
+        enterCardInfoQ.setRows(5);
+        enterCardInfoQ.setWrapStyleWord(true);
+        enterCardInfoQ.setMargin(new java.awt.Insets(35, 35, 35, 35));
+        jScrollPane2.setViewportView(enterCardInfoQ);
+
+        submittedCardsLabel.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        submittedCardsLabel.setText("Cards : 0");
+
+        jScrollPane3.setViewportBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+
+        enterCardInfoA.setColumns(20);
+        enterCardInfoA.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
+        enterCardInfoA.setLineWrap(true);
+        enterCardInfoA.setRows(5);
+        enterCardInfoA.setWrapStyleWord(true);
+        enterCardInfoA.setMargin(new java.awt.Insets(35, 35, 35, 35));
+        jScrollPane3.setViewportView(enterCardInfoA);
+
+        AnswerLabel.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        AnswerLabel.setText("Answer");
+
+        removeBtn.setText("Undo");
+        removeBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                removeBtnActionPerformed(evt);
+            }
+        });
+
+        addBtn.setText("Add ");
+        addBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                addBtnActionPerformed(evt);
+            }
+        });
+
+        submittedArea.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        jScrollPane5.setViewportView(submittedArea);
+
+        jMenu2.setText("File");
+
+        menuItemSave.setText("Export Flash Cards");
+        menuItemSave.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuItemSaveActionPerformed(evt);
+            }
+        });
+        jMenu2.add(menuItemSave);
+
+        menuBar.add(jMenu2);
+
+        cardMakerFrame.setJMenuBar(menuBar);
+
+        javax.swing.GroupLayout cardMakerFrameLayout = new javax.swing.GroupLayout(cardMakerFrame.getContentPane());
+        cardMakerFrame.getContentPane().setLayout(cardMakerFrameLayout);
+        cardMakerFrameLayout.setHorizontalGroup(
+            cardMakerFrameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(cardMakerFrameLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(cardMakerFrameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(QuestionLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(AnswerLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(32, 32, 32)
+                .addGroup(cardMakerFrameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(cardMakerFrameLayout.createSequentialGroup()
+                        .addComponent(addBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(removeBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(submittedCardsLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 172, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                .addContainerGap(23, Short.MAX_VALUE))
+        );
+        cardMakerFrameLayout.setVerticalGroup(
+            cardMakerFrameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(cardMakerFrameLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(cardMakerFrameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(submittedCardsLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(QuestionLabel))
+                .addGap(11, 11, 11)
+                .addGroup(cardMakerFrameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addGroup(cardMakerFrameLayout.createSequentialGroup()
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 265, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(AnswerLabel)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 265, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(cardMakerFrameLayout.createSequentialGroup()
+                        .addComponent(jScrollPane5)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(cardMakerFrameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(removeBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 111, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(addBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 111, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addGap(20, 20, 20))
+        );
+
+        saveFileFrame.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        saveFileFrame.setTitle("Export");
+        saveFileFrame.setAlwaysOnTop(true);
+
+        javax.swing.GroupLayout saveFileFrameLayout = new javax.swing.GroupLayout(saveFileFrame.getContentPane());
+        saveFileFrame.getContentPane().setLayout(saveFileFrameLayout);
+        saveFileFrameLayout.setHorizontalGroup(
+            saveFileFrameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 400, Short.MAX_VALUE)
+        );
+        saveFileFrameLayout.setVerticalGroup(
+            saveFileFrameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 300, Short.MAX_VALUE)
+        );
+
+        javax.swing.GroupLayout openFileFrameLayout = new javax.swing.GroupLayout(openFileFrame.getContentPane());
+        openFileFrame.getContentPane().setLayout(openFileFrameLayout);
+        openFileFrameLayout.setHorizontalGroup(
+            openFileFrameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 400, Short.MAX_VALUE)
+        );
+        openFileFrameLayout.setVerticalGroup(
+            openFileFrameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 300, Short.MAX_VALUE)
+        );
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(255, 255, 255));
@@ -120,6 +316,32 @@ public class FlashCards extends javax.swing.JFrame {
         });
         jScrollPane1.setViewportView(flashCardBtn);
 
+        jMenu1.setText("File");
+
+        openMenuItem.setText("Open");
+        openMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                openMenuItemActionPerformed(evt);
+            }
+        });
+        jMenu1.add(openMenuItem);
+
+        jMenuBar1.add(jMenu1);
+
+        cardMaker.setText("Options");
+
+        cardMakerItem.setText("Make Flash Cards");
+        cardMakerItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cardMakerItemActionPerformed(evt);
+            }
+        });
+        cardMaker.add(cardMakerItem);
+
+        jMenuBar1.add(cardMaker);
+
+        setJMenuBar(jMenuBar1);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -139,7 +361,7 @@ public class FlashCards extends javax.swing.JFrame {
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(63, Short.MAX_VALUE)
+                .addContainerGap(41, Short.MAX_VALUE)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 255, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -184,6 +406,150 @@ public class FlashCards extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_flashCardBtnMousePressed
 
+    private void removeBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeBtnActionPerformed
+        // TODO add your handling code here:
+        removeCard();
+        checkVis();
+    }//GEN-LAST:event_removeBtnActionPerformed
+
+    private void removeCard()
+    {
+        //find the end of the arraylist and remove it for undo Button
+        int last;
+        if(flashCards.size() > 0)
+        {
+            last = flashCards.size()-1;
+            enterCardInfoQ.setText(flashCards.get(last)[0]);
+            enterCardInfoA.setText(flashCards.get(last)[1]);
+            flashCards.remove(last);
+            cardList.remove(last);
+            last = flashCards.size()-1;
+            //submittedArea.setText("Question " + flashCards.get(last)[0] + "\n" + "Answer " + flashCards.get(last)[1]);
+            submittedCardsLabel.setText("Cards: " + flashCards.size());
+        }
+        else //do this only if it's the first card
+        {
+            last = 0;
+            enterCardInfoQ.setText(flashCards.get(last)[0]);
+            enterCardInfoA.setText(flashCards.get(last)[1]);
+            flashCards.remove(last);
+            cardList.removeElement(last);
+            //submittedArea.setText("");
+            submittedCardsLabel.setText("Cards: 0");
+        }
+  
+         //should note, goal will be to eventually let user choose card from list to edit and then delete... might be a cool feature
+    }
+    private void addBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addBtnActionPerformed
+        // TODO add your handling code here:
+        addCard();
+        checkVis();
+    }//GEN-LAST:event_addBtnActionPerformed
+
+    private void addCard()
+    {
+        //adds text data user added to array and then ArrayList
+        //IMPORTANT This shares the Same ArrayList as the flashcard frame
+         String [] temp = {enterCardInfoQ.getText(), enterCardInfoA.getText()};
+         flashCards.add(temp); 
+         String addedCard;
+         addedCard = ("Card " + (flashCards.size()) + " created.");
+         cardList.addElement(addedCard);
+         //submittedArea.setText("Question " + flashCards.get(flashCards.size()-1)[0] + "\n" + "Answer " + flashCards.get(flashCards.size()-1)[1]);
+         submittedCardsLabel.setText("Cards: " + flashCards.size());
+         enterCardInfoQ.setText("");
+         enterCardInfoA.setText("");
+    }
+    //lets user find location to save file and then uses saveFile method to save ArrayList Info to a file as String data
+    private void menuItemSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuItemSaveActionPerformed
+        // TODO add your handling code here:
+        JFileChooser fileSave = new JFileChooser();
+        fileSave.showSaveDialog(saveFileFrame);
+        saveFile(fileSave.getSelectedFile());
+    }//GEN-LAST:event_menuItemSaveActionPerformed
+
+    private void saveFile(File selectedFile) 
+    {
+            try {
+                BufferedWriter writer = new BufferedWriter(new FileWriter(selectedFile + ".txt"));
+                for(String [] getCard : flashCards) {
+                    writer.write(getCard[0] + " /");
+                    writer.write(getCard[1] + "\n");
+                }
+                writer.close();
+            } catch (Exception e) {
+                //System.out.println("Error: Couldn't write to file.");
+                JOptionPane.showMessageDialog(null, "Error: Couldn't write to file.", "Error", JOptionPane.ERROR_MESSAGE);
+                e.printStackTrace();
+            }
+    }
+    //opens the frame that will allow a user to make and save flash cards
+    private void cardMakerItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cardMakerItemActionPerformed
+        // TODO add your handling code here:
+        //opens up the card maker frame to make the cards
+         cardMakerFrame.setVisible(true);
+         cardMakerFrame.setSize(761,650);
+         //The two frames share the ArrayList so clear of previous list
+         this.clearDisplayFrame();
+         //instead of closing it, make it so user can't use flashcards till cardMaker frame closes
+        this.setEnabled(false);
+    }//GEN-LAST:event_cardMakerItemActionPerformed
+
+    private void cardMakerFrameWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_cardMakerFrameWindowClosing
+        // TODO add your handling code here:
+        this.setEnabled(true);
+        //the two frames share the ArrayList so this makes it so its a blank slate, ready for the user to open a set of flashcards
+        this.clearDisplayFrame();
+    }//GEN-LAST:event_cardMakerFrameWindowClosing
+
+    //lets the user locate and find a file to be opened and then calls the readFile method to put String data
+    //formatted by the saveFile methodinto the ArrayList
+    private void openMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openMenuItemActionPerformed
+        // TODO add your handling code here:
+        //reset the cards before loading in the new set
+        this.clearDisplayFrame();
+        JFileChooser fileLoad = new JFileChooser();
+        fileLoad.showOpenDialog(openFileFrame);
+        readFile(fileLoad.getSelectedFile());
+        nextBtn.setVisible(true);
+        cardNumLabel.setVisible(true);
+        showCard(0);
+        
+            
+    }//GEN-LAST:event_openMenuItemActionPerformed
+    
+    private void readFile(File selectedFile) 
+    {
+      
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(selectedFile));
+            String question = reader.readLine();
+            String answer = "";
+            int seperator = 0;
+            while (question != null) {
+                for(int i=0; i < question.length(); ++i)
+                {
+                    if(question.charAt(i) == '/')
+                    {
+                        seperator = i;
+                        i=question.length();                        
+                    }
+                }
+                    answer = question.substring((seperator+1));  
+                    question = question.substring(0, (seperator-1));
+                    String [] temp = {question, answer};
+                    flashCards.add(temp);
+                    question = reader.readLine();
+                }
+                reader.close();
+            } catch (Exception e) {
+                //System.out.println("Error: Couldn't read to file.");
+                JOptionPane.showMessageDialog(null, "Error: Couldn't read file.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+          
+    }
+    
+    
     /**
      * @param args the command line arguments
      */
@@ -220,10 +586,32 @@ public class FlashCards extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel AnswerLabel;
+    private javax.swing.JLabel QuestionLabel;
+    private javax.swing.JButton addBtn;
+    private javax.swing.JMenu cardMaker;
+    private javax.swing.JFrame cardMakerFrame;
+    private javax.swing.JMenuItem cardMakerItem;
     private javax.swing.JLabel cardNumLabel;
+    private javax.swing.JTextArea enterCardInfoA;
+    private javax.swing.JTextArea enterCardInfoQ;
     private javax.swing.JTextArea flashCardBtn;
+    private javax.swing.JMenu jMenu1;
+    private javax.swing.JMenu jMenu2;
+    private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JScrollPane jScrollPane5;
+    private javax.swing.JMenuBar menuBar;
+    private javax.swing.JMenuItem menuItemSave;
     private javax.swing.JButton nextBtn;
+    private javax.swing.JFrame openFileFrame;
+    private javax.swing.JMenuItem openMenuItem;
     private javax.swing.JButton prevBtn;
+    private javax.swing.JButton removeBtn;
+    private javax.swing.JFrame saveFileFrame;
+    private javax.swing.JList<String> submittedArea;
+    private javax.swing.JLabel submittedCardsLabel;
     // End of variables declaration//GEN-END:variables
 }
