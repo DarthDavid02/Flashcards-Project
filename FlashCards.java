@@ -7,7 +7,6 @@ import java.io.FileWriter;
 import java.util.ArrayList;
 import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
 
 /*
@@ -29,9 +28,10 @@ public class FlashCards extends javax.swing.JFrame {
 
 //    private String [][] card = {{"4 + 4 =", "8"},{"What is The meaning of Life?", "42"},{"Who's the best?", "You are!"},
 //        {"What is a super random fact that absolutely no one would ever even know in their lives" + '\n' + "except that one person who would know it?", "The cake is a lie"}};
-    private ArrayList <String[]> flashCards = new ArrayList<String[]>();
+    private ArrayList <Cards> flashCards = new ArrayList<Cards>();
     private int cardCount = 0;
     boolean isFlipped = false;
+    boolean isEditing = false;
     private DefaultListModel <String> cardList = new DefaultListModel<String>();
     public FlashCards() {
         initComponents();
@@ -49,6 +49,8 @@ public class FlashCards extends javax.swing.JFrame {
        flashCardBtn.setText("");
        cardCount=0;
        flashCards.clear();
+       cardList.clear();
+       submittedCardsLabel.setText("Cards: 0");
 //       ArrayList <String[]> temp = new ArrayList<String[]>();
 //       flashCards = temp;
     }
@@ -81,21 +83,28 @@ public class FlashCards extends javax.swing.JFrame {
       {
         prevBtn.setVisible(true);
       }
-      
+    
+
+      /* OLD CODE
       //hide the undo button when arrayList is empty to stop user from going out of bounds
         if(flashCards.isEmpty())
         {
             removeBtn.setVisible(false);
+            
         }
         else
         {
             removeBtn.setVisible(true);
+            
         }
-        
+        */
+    
+     
     }
     public void showCard(int side)
     {
-        flashCardBtn.setText(flashCards.get(cardCount)[side]);
+        
+        flashCardBtn.setText(flashCards.get(cardCount).getSide(side));
         cardNumLabel.setText((cardCount+1) + "/" + flashCards.size());
     }
     /**
@@ -122,6 +131,7 @@ public class FlashCards extends javax.swing.JFrame {
         menuBar = new javax.swing.JMenuBar();
         jMenu2 = new javax.swing.JMenu();
         menuItemSave = new javax.swing.JMenuItem();
+        importMenuItm = new javax.swing.JMenuItem();
         saveFileFrame = new javax.swing.JFrame();
         openFileFrame = new javax.swing.JFrame();
         prevBtn = new javax.swing.JButton();
@@ -174,7 +184,7 @@ public class FlashCards extends javax.swing.JFrame {
         AnswerLabel.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         AnswerLabel.setText("Answer");
 
-        removeBtn.setText("Undo");
+        removeBtn.setText("Remove");
         removeBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 removeBtnActionPerformed(evt);
@@ -189,6 +199,11 @@ public class FlashCards extends javax.swing.JFrame {
         });
 
         submittedArea.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        submittedArea.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                submittedAreaMousePressed(evt);
+            }
+        });
         jScrollPane5.setViewportView(submittedArea);
 
         jMenu2.setText("File");
@@ -200,6 +215,14 @@ public class FlashCards extends javax.swing.JFrame {
             }
         });
         jMenu2.add(menuItemSave);
+
+        importMenuItm.setText("Import Flash Cards");
+        importMenuItm.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                importMenuItmActionPerformed(evt);
+            }
+        });
+        jMenu2.add(importMenuItm);
 
         menuBar.add(jMenu2);
 
@@ -247,7 +270,7 @@ public class FlashCards extends javax.swing.JFrame {
                         .addGroup(cardMakerFrameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(removeBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 111, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(addBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 111, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addGap(20, 20, 20))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         saveFileFrame.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -397,30 +420,66 @@ public class FlashCards extends javax.swing.JFrame {
         if(isFlipped)
         {
             isFlipped = false;
-            showCard(0);
+            if(!flashCards.isEmpty())
+            {
+                showCard(0);
+            }
+            
         }
         else
         {
             isFlipped = true;
-            showCard(1);
+             if(!flashCards.isEmpty())
+            {
+                 showCard(1);
+            }
+           
         }
     }//GEN-LAST:event_flashCardBtnMousePressed
 
     private void removeBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeBtnActionPerformed
         // TODO add your handling code here:
-        removeCard();
-        checkVis();
+        removeCard(submittedArea.getSelectedIndex());
+        removeBtn.setVisible(isEditing);
+        submittedArea.clearSelection();
     }//GEN-LAST:event_removeBtnActionPerformed
 
-    private void removeCard()
+    private void removeCard(int index)
     {
+        String addedCard; 
+            enterCardInfoQ.setText("");
+            enterCardInfoA.setText("");
+            //DEBUG
+            //JOptionPane.showMessageDialog(null, index, "Error", JOptionPane.ERROR_MESSAGE);
+            //removes the card data
+            flashCards.remove(index);
+            
+            //DEBUG
+            //JOptionPane.showMessageDialog(null, index, "Error", JOptionPane.ERROR_MESSAGE);
+            
+            //updates the list to show card is removed
+            //cardList.setElementAt("", index);
+            cardList.remove(index);
+      
+        for(int i = 0; i < flashCards.size(); i++)
+        {         
+         addedCard = ("Card " + (i + 1) + " is updated.");
+         cardList.setElementAt(addedCard, i);
+        }
+        submittedCardsLabel.setText("Cards: " + flashCards.size());
+        addBtn.setText("Add");
+        isEditing = false;
+        
+        //JOptionPane.showMessageDialog(null, cardList.size(), "Error", JOptionPane.ERROR_MESSAGE);
+        
+        /* OLD CODE
         //find the end of the arraylist and remove it for undo Button
         int last;
         if(flashCards.size() > 0)
         {
             last = flashCards.size()-1;
-            enterCardInfoQ.setText(flashCards.get(last)[0]);
-            enterCardInfoA.setText(flashCards.get(last)[1]);
+            enterCardInfoQ.setText(flashCards.get(last).getQuestion());
+            enterCardInfoA.setText(flashCards.get(last).getAnswer());
             flashCards.remove(last);
             cardList.remove(last);
             last = flashCards.size()-1;
@@ -430,8 +489,8 @@ public class FlashCards extends javax.swing.JFrame {
         else //do this only if it's the first card
         {
             last = 0;
-            enterCardInfoQ.setText(flashCards.get(last)[0]);
-            enterCardInfoA.setText(flashCards.get(last)[1]);
+            enterCardInfoQ.setText(flashCards.get(last).getQuestion());
+            enterCardInfoA.setText(flashCards.get(last).getAnswer());
             flashCards.remove(last);
             cardList.removeElement(last);
             //submittedArea.setText("");
@@ -439,10 +498,21 @@ public class FlashCards extends javax.swing.JFrame {
         }
   
          //should note, goal will be to eventually let user choose card from list to edit and then delete... might be a cool feature
+        */
+        
     }
     private void addBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addBtnActionPerformed
         // TODO add your handling code here:
-        addCard();
+        if(isEditing)
+        {
+            addCard(cardList.indexOf(submittedArea.getSelectedValue()));
+            removeBtn.setVisible(isEditing);
+        }
+        else
+        {
+            addCard();
+        }
+        
         checkVis();
     }//GEN-LAST:event_addBtnActionPerformed
 
@@ -450,8 +520,19 @@ public class FlashCards extends javax.swing.JFrame {
     {
         //adds text data user added to array and then ArrayList
         //IMPORTANT This shares the Same ArrayList as the flashcard frame
-         String [] temp = {enterCardInfoQ.getText(), enterCardInfoA.getText()};
-         flashCards.add(temp); 
+        Cards myCard = new Cards();
+         if(enterCardInfoQ.getText().equals("") || enterCardInfoA.getText().equals(""))
+        {
+            myCard.setQuestion("This is Placeholder Text");
+            myCard.setAnswer("This is Placeholder Text");
+        }
+        else
+        {
+            myCard.setQuestion(enterCardInfoQ.getText());
+            myCard.setAnswer(enterCardInfoA.getText());
+        }
+       
+        flashCards.add(myCard);
          String addedCard;
          addedCard = ("Card " + (flashCards.size()) + " created.");
          cardList.addElement(addedCard);
@@ -464,17 +545,21 @@ public class FlashCards extends javax.swing.JFrame {
     private void menuItemSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuItemSaveActionPerformed
         // TODO add your handling code here:
         JFileChooser fileSave = new JFileChooser();
-        fileSave.showSaveDialog(saveFileFrame);
-        saveFile(fileSave.getSelectedFile());
+        int selection = fileSave.showSaveDialog(saveFileFrame);
+        if(selection == JFileChooser.APPROVE_OPTION);
+        {
+            saveFile(fileSave.getSelectedFile());
+        }
+        
     }//GEN-LAST:event_menuItemSaveActionPerformed
 
     private void saveFile(File selectedFile) 
     {
             try {
                 BufferedWriter writer = new BufferedWriter(new FileWriter(selectedFile + ".txt"));
-                for(String [] getCard : flashCards) {
-                    writer.write(getCard[0] + " /");
-                    writer.write(getCard[1] + "\n");
+                for(int i = 0; i < flashCards.size(); i++) {
+                    writer.write(flashCards.get(i).getQuestion() + " /");
+                    writer.write(flashCards.get(i).getAnswer() + "\n");
                 }
                 writer.close();
             } catch (Exception e) {
@@ -488,7 +573,8 @@ public class FlashCards extends javax.swing.JFrame {
         // TODO add your handling code here:
         //opens up the card maker frame to make the cards
          cardMakerFrame.setVisible(true);
-         cardMakerFrame.setSize(761,650);
+         cardMakerFrame.setSize(760,650);
+         removeBtn.setVisible(isEditing);
          //The two frames share the ArrayList so clear of previous list
          this.clearDisplayFrame();
          //instead of closing it, make it so user can't use flashcards till cardMaker frame closes
@@ -498,6 +584,7 @@ public class FlashCards extends javax.swing.JFrame {
     private void cardMakerFrameWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_cardMakerFrameWindowClosing
         // TODO add your handling code here:
         this.setEnabled(true);
+        
         //the two frames share the ArrayList so this makes it so its a blank slate, ready for the user to open a set of flashcards
         this.clearDisplayFrame();
     }//GEN-LAST:event_cardMakerFrameWindowClosing
@@ -509,14 +596,99 @@ public class FlashCards extends javax.swing.JFrame {
         //reset the cards before loading in the new set
         this.clearDisplayFrame();
         JFileChooser fileLoad = new JFileChooser();
-        fileLoad.showOpenDialog(openFileFrame);
-        readFile(fileLoad.getSelectedFile());
-        nextBtn.setVisible(true);
-        cardNumLabel.setVisible(true);
-        showCard(0);
+        int selection = fileLoad.showOpenDialog(openFileFrame);
+        if(selection == JFileChooser.APPROVE_OPTION)
+        {
+            readFile(fileLoad.getSelectedFile());
+            checkVis();
+            cardNumLabel.setVisible(true);
+            showCard(0);
+        }
+        
         
             
     }//GEN-LAST:event_openMenuItemActionPerformed
+
+    private void editCard(int index)
+    {
+ 
+          enterCardInfoQ.setText(flashCards.get(index).getQuestion());
+          enterCardInfoA.setText(flashCards.get(index).getAnswer());         
+          isEditing = true;
+          addBtn.setText("Finish Edit");
+    }
+    
+    private void addCard(int index)
+    {
+         if(flashCards.get(index).getQuestion().equals("") || flashCards.get(index).getAnswer().equals(""))
+        {
+            enterCardInfoQ.setText("This is Placeholder Text");
+            enterCardInfoA.setText("This is Placeholder Text");
+        }
+        else
+        {
+            flashCards.get(index).setQuestion(enterCardInfoQ.getText());
+            flashCards.get(index).setAnswer(enterCardInfoA.getText());
+        }
+        
+        String addedCard;
+        addedCard = ("Card " + (index + 1) + " was changed.");
+        cardList.setElementAt(addedCard, index);
+        addBtn.setText("Add");
+        enterCardInfoQ.setText("");
+        enterCardInfoA.setText("");
+        isEditing = false;
+    }
+    
+    private void submittedAreaMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_submittedAreaMousePressed
+        // TODO add your handling code here:
+         if(submittedArea.getSelectedIndex() > -1)
+        {
+         editCard(submittedArea.getSelectedIndex());
+         removeBtn.setVisible(isEditing);
+        }
+        else
+        {
+            JOptionPane.showMessageDialog(null, "Error: nothing is selected", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_submittedAreaMousePressed
+
+    private void importMenuItmActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_importMenuItmActionPerformed
+        // TODO add your handling code here:
+        boolean doessave = false;
+        if(!cardList.isEmpty())
+        {
+            int reply = JOptionPane.showConfirmDialog(null, "Would you like to export before opening a new file? \nAll current work will be lost.", "Export Cards?", JOptionPane.YES_NO_OPTION);
+            if(reply == JOptionPane.YES_OPTION)
+            {
+               JFileChooser fileSave = new JFileChooser();
+               int selection = fileSave.showSaveDialog(saveFileFrame);
+               if(selection == JFileChooser.APPROVE_OPTION)
+               {
+                   saveFile(fileSave.getSelectedFile());
+                   this.clearDisplayFrame();
+
+               }
+               
+            }
+        }
+        
+            JFileChooser fileSave = new JFileChooser(); 
+            this.clearDisplayFrame();
+            JFileChooser fileLoad = new JFileChooser();
+            int selection = fileLoad.showOpenDialog(openFileFrame);
+            if(selection == JFileChooser.APPROVE_OPTION)
+            {
+                readFile(fileLoad.getSelectedFile());
+                for(int i = 0; i < flashCards.size(); ++i)
+                {
+                    cardList.addElement("Card " + (i+1) + " was added.");
+                }
+            }
+                
+        
+     
+    }//GEN-LAST:event_importMenuItmActionPerformed
     
     private void readFile(File selectedFile) 
     {
@@ -537,8 +709,9 @@ public class FlashCards extends javax.swing.JFrame {
                 }
                     answer = question.substring((seperator+1));  
                     question = question.substring(0, (seperator-1));
-                    String [] temp = {question, answer};
-                    flashCards.add(temp);
+                    flashCards.add(new Cards());
+                    flashCards.get(flashCards.size()-1).setQuestion(question);
+                    flashCards.get(flashCards.size()-1).setAnswer(answer);                   
                     question = reader.readLine();
                 }
                 reader.close();
@@ -596,6 +769,7 @@ public class FlashCards extends javax.swing.JFrame {
     private javax.swing.JTextArea enterCardInfoA;
     private javax.swing.JTextArea enterCardInfoQ;
     private javax.swing.JTextArea flashCardBtn;
+    private javax.swing.JMenuItem importMenuItm;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenuBar jMenuBar1;
