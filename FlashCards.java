@@ -655,7 +655,7 @@ public class FlashCards extends javax.swing.JFrame {
 
     private void importMenuItmActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_importMenuItmActionPerformed
         // TODO add your handling code here:
-        boolean doessave = false;
+        
         if(!cardList.isEmpty())
         {
             int reply = JOptionPane.showConfirmDialog(null, "Would you like to export before opening a new file? \nAll current work will be lost.", "Export Cards?", JOptionPane.YES_NO_OPTION);
