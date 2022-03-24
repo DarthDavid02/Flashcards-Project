@@ -19,9 +19,9 @@ import javax.swing.JOptionPane;
  * @author donov
  */
 public class CardMaker extends javax.swing.JFrame {
-    private ArrayList <Cards> flashCards = new ArrayList<Cards>();
+    
     boolean isEditing = false;
-    private DefaultListModel <String> cardList = new DefaultListModel<String>();
+    private DefaultListModel <Cards> cardList = new DefaultListModel<Cards>();
     //original window reference
     private FlashCards quizWindow;
     /**
@@ -40,7 +40,6 @@ public class CardMaker extends javax.swing.JFrame {
     
      private void clearDisplayFrame()
     {
-       flashCards.clear();
        cardList.clear();
        submittedCardsLabel.setText("Cards: 0");
        isEditing = false;
@@ -51,9 +50,9 @@ private void saveFile(File selectedFile)
     {
             try {
                 BufferedWriter writer = new BufferedWriter(new FileWriter(selectedFile + ".txt"));
-                for(int i = 0; i < flashCards.size(); i++) {
-                    writer.write(flashCards.get(i).getQuestion() + " /");
-                    writer.write(flashCards.get(i).getAnswer() + "\n");
+                for(int i = 0; i < cardList.size(); i++) {
+                    writer.write(cardList.getElementAt(i).getQuestion() + " /");
+                    writer.write(cardList.getElementAt(i).getAnswer() + "\n");
                 }
                 writer.close();
             } catch (Exception e) {
@@ -81,73 +80,81 @@ private void saveFile(File selectedFile)
                 }
                     answer = question.substring((seperator+1));  
                     question = question.substring(0, (seperator-1));
-                    flashCards.add(new Cards());
-                    flashCards.get(flashCards.size()-1).setQuestion(question);
-                    flashCards.get(flashCards.size()-1).setAnswer(answer);                   
+                    cardList.addElement(new Cards(question, answer));
+                    cardList.get(cardList.getSize()-1).setCardNum(cardList.size());
+                    cardList.get(cardList.getSize()-1).setStatus("import succeeded");
                     question = reader.readLine();
                 }
                 reader.close();
             } catch (Exception e) {
                 //System.out.println("Error: Couldn't read to file.");
                 JOptionPane.showMessageDialog(null, "Error: Couldn't read file.", "Error", JOptionPane.ERROR_MESSAGE);
-            }
-          
+            }       
     }
-     private void removeCard(int index)
+ 
+     private void removeCard(Cards selectedCard)
     {
-        String addedCard; 
+       //String addedCard; 
             enterCardInfoQ.setText("");
-            enterCardInfoA.setText("");
-            //DEBUG
-            //JOptionPane.showMessageDialog(null, index, "Error", JOptionPane.ERROR_MESSAGE);
-            //removes the card data
-            flashCards.remove(index);
-            
-            //DEBUG
-            //JOptionPane.showMessageDialog(null, index, "Error", JOptionPane.ERROR_MESSAGE);
-            
+            enterCardInfoA.setText(""); 
             //updates the list to show card is removed
-            cardList.remove(index);
+            cardList.removeElement(selectedCard);
       
-        for(int i = 0; i < flashCards.size(); i++)
+        for(int i = 0; i < cardList.size(); i++)
         {         
-         addedCard = ("Card " + (i + 1) + " is updated.");
-         cardList.setElementAt(addedCard, i);
+         cardList.elementAt(i).setCardNum(i+1);
         }
-        submittedCardsLabel.setText("Cards: " + flashCards.size());
+        submittedCardsLabel.setText("Cards: " + cardList.size());
         addBtn.setText("Add");
+        isEditing = false; 
+    }
+     
+    private void addCard()
+    {
+        //adds new card to card list
+        Cards myCard;
+         if(enterCardInfoQ.getText().equals("") || enterCardInfoA.getText().equals(""))
+        {
+            myCard = new Cards("This is Placeholder Text", "This is Placeholder Text");
+        }
+        else
+        {
+            myCard = new Cards(enterCardInfoQ.getText(), enterCardInfoA.getText());
+        }
+         cardList.addElement(myCard);
+         cardList.get(cardList.size()-1).setCardNum(cardList.size());
+         cardList.get(cardList.size()-1).setStatus("created");      
+         submittedCardsLabel.setText("Cards: " + cardList.size());
+         enterCardInfoQ.setText("");
+         enterCardInfoA.setText("");
+    }
+    
+        private void editCard(Cards selectedCard)
+    {
+          enterCardInfoQ.setText(selectedCard.getQuestion());
+          enterCardInfoA.setText(selectedCard.getAnswer());         
+          isEditing = true;
+          addBtn.setText("Finish Edit");
+    }
+    
+    private void addCard(Cards selectedCard)
+    {
+        //changes values of cards already in cardList
+         if(enterCardInfoQ.getText().equals("") || enterCardInfoA.getText().equals(""))
+        {
+            selectedCard.setQuestion("This is Placeholder Text");
+            selectedCard.setAnswer("This is Placeholder Text");
+        }
+        else
+        {
+            selectedCard.setQuestion(enterCardInfoQ.getText());
+            selectedCard.setAnswer(enterCardInfoA.getText());
+        }
+        cardList.get((selectedCard.getCardNum()-1)).setStatus("updated");
+        addBtn.setText("Add");
+        enterCardInfoQ.setText("");
+        enterCardInfoA.setText("");
         isEditing = false;
-        
-        //JOptionPane.showMessageDialog(null, cardList.size(), "Error", JOptionPane.ERROR_MESSAGE);
-        
-        /* OLD CODE
-        //find the end of the arraylist and remove it for undo Button
-        int last;
-        if(flashCards.size() > 0)
-        {
-            last = flashCards.size()-1;
-            enterCardInfoQ.setText(flashCards.get(last).getQuestion());
-            enterCardInfoA.setText(flashCards.get(last).getAnswer());
-            flashCards.remove(last);
-            cardList.remove(last);
-            last = flashCards.size()-1;
-            //submittedArea.setText("Question " + flashCards.get(last)[0] + "\n" + "Answer " + flashCards.get(last)[1]);
-            submittedCardsLabel.setText("Cards: " + flashCards.size());
-        }
-        else //do this only if it's the first card
-        {
-            last = 0;
-            enterCardInfoQ.setText(flashCards.get(last).getQuestion());
-            enterCardInfoA.setText(flashCards.get(last).getAnswer());
-            flashCards.remove(last);
-            cardList.removeElement(last);
-            //submittedArea.setText("");
-            submittedCardsLabel.setText("Cards: 0");
-        }
-  
-         //should note, goal will be to eventually let user choose card from list to edit and then delete... might be a cool feature
-        */
-        
     }
  
     /**
@@ -259,7 +266,6 @@ private void saveFile(File selectedFile)
             }
         });
 
-        submittedArea.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         submittedArea.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         submittedArea.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mousePressed(java.awt.event.MouseEvent evt) {
@@ -295,7 +301,7 @@ private void saveFile(File selectedFile)
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
+                .addGap(26, 26, 26)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(QuestionLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -303,36 +309,36 @@ private void saveFile(File selectedFile)
                     .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(32, 32, 32)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(addBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(removeBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(submittedCardsLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 172, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(addBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(removeBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(32, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
+                .addGap(20, 20, 20)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(submittedCardsLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(QuestionLabel))
                 .addGap(11, 11, 11)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 496, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(addBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(removeBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 265, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(AnswerLabel)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 265, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jScrollPane5)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(removeBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 111, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(addBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 111, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 265, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(33, Short.MAX_VALUE))
         );
 
         pack();
@@ -340,7 +346,7 @@ private void saveFile(File selectedFile)
 
     private void menuItemSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuItemSaveActionPerformed
         // TODO add your handling code here:
-        JFileChooser fileSave = new JFileChooser();
+        JFileChooser fileSave = new JFileChooser("E:\\Quizlet FlashCard Files");
         int selection = fileSave.showSaveDialog(saveFileFrame);
         if(selection == JFileChooser.APPROVE_OPTION);
         {
@@ -352,105 +358,42 @@ private void saveFile(File selectedFile)
 
     private void importMenuItmActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_importMenuItmActionPerformed
         // TODO add your handling code here:
-
         if(!cardList.isEmpty())
         {
             int reply = JOptionPane.showConfirmDialog(null, "Would you like to export before opening a new file? \nAll current work will be lost.", "Export Cards?", JOptionPane.YES_NO_OPTION);
             if(reply == JOptionPane.YES_OPTION)
             {
-                JFileChooser fileSave = new JFileChooser();
+                JFileChooser fileSave = new JFileChooser("E:\\Quizlet FlashCard Files");
                 int selection = fileSave.showSaveDialog(saveFileFrame);
                 if(selection == JFileChooser.APPROVE_OPTION)
                 {
                     saveFile(fileSave.getSelectedFile());
                     this.clearDisplayFrame();
-
                 }
-
             }
         }
+        
         this.clearDisplayFrame();
-        JFileChooser fileLoad = new JFileChooser();
+        JFileChooser fileLoad = new JFileChooser("E:\\Quizlet FlashCard Files");
         int selection = fileLoad.showOpenDialog(openFileFrame);
         if(selection == JFileChooser.APPROVE_OPTION)
         {
             readFile(fileLoad.getSelectedFile());
-            for(int i = 0; i < flashCards.size(); ++i)
-            {
-                cardList.addElement("Card " + (i+1) + " was added.");
-            }
         }
     }//GEN-LAST:event_importMenuItmActionPerformed
 
     private void removeBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeBtnActionPerformed
         // TODO add your handling code here:
-        removeCard(submittedArea.getSelectedIndex());
+        removeCard(submittedArea.getSelectedValue());
         removeBtn.setVisible(isEditing);
         submittedArea.clearSelection();
     }//GEN-LAST:event_removeBtnActionPerformed
-
-    private void addCard()
-    {
-        //adds text data user added to array and then ArrayList
-        //IMPORTANT This shares the Same ArrayList as the flashcard frame
-        Cards myCard = new Cards();
-         if(enterCardInfoQ.getText().equals("") || enterCardInfoA.getText().equals(""))
-        {
-            myCard.setQuestion("This is Placeholder Text");
-            myCard.setAnswer("This is Placeholder Text");
-        }
-        else
-        {
-            myCard.setQuestion(enterCardInfoQ.getText());
-            myCard.setAnswer(enterCardInfoA.getText());
-        }
-       
-        flashCards.add(myCard);
-         String addedCard;
-         addedCard = ("Card " + (flashCards.size()) + " created.");
-         cardList.addElement(addedCard);
-         //submittedArea.setText("Question " + flashCards.get(flashCards.size()-1)[0] + "\n" + "Answer " + flashCards.get(flashCards.size()-1)[1]);
-         submittedCardsLabel.setText("Cards: " + flashCards.size());
-         enterCardInfoQ.setText("");
-         enterCardInfoA.setText("");
-    }
-    
-        private void editCard(int index)
-    {
- 
-          enterCardInfoQ.setText(flashCards.get(index).getQuestion());
-          enterCardInfoA.setText(flashCards.get(index).getAnswer());         
-          isEditing = true;
-          addBtn.setText("Finish Edit");
-    }
-    
-    private void addCard(int index)
-    {
-         if(flashCards.get(index).getQuestion().equals("") || flashCards.get(index).getAnswer().equals(""))
-        {
-            enterCardInfoQ.setText("This is Placeholder Text");
-            enterCardInfoA.setText("This is Placeholder Text");
-        }
-        else
-        {
-            flashCards.get(index).setQuestion(enterCardInfoQ.getText());
-            flashCards.get(index).setAnswer(enterCardInfoA.getText());
-        }
-        
-        String addedCard;
-        addedCard = ("Card " + (index + 1) + " was changed.");
-        cardList.setElementAt(addedCard, index);
-        addBtn.setText("Add");
-        enterCardInfoQ.setText("");
-        enterCardInfoA.setText("");
-        isEditing = false;
-    }
-    
+   
     private void addBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addBtnActionPerformed
         // TODO add your handling code here:
         if(isEditing)
         {
-            addCard(cardList.indexOf(submittedArea.getSelectedValue()));
+            addCard(submittedArea.getSelectedValue());
             removeBtn.setVisible(isEditing);
         }
         else
@@ -459,24 +402,23 @@ private void saveFile(File selectedFile)
         }    
     }//GEN-LAST:event_addBtnActionPerformed
 
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+        // TODO add your handling code here:       
+        quizWindow.resetEnable();
+    }//GEN-LAST:event_formWindowClosing
+
     private void submittedAreaMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_submittedAreaMousePressed
         // TODO add your handling code here:
-        if(submittedArea.getSelectedIndex() > -1)
+        if(!cardList.isEmpty())
         {
-            editCard(submittedArea.getSelectedIndex());
+            editCard(submittedArea.getSelectedValue());
             removeBtn.setVisible(isEditing);
         }
         else
         {
-            JOptionPane.showMessageDialog(null, "Error: nothing is selected", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Error: No cards are in the list", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_submittedAreaMousePressed
-
-    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
-        // TODO add your handling code here:
-        
-        quizWindow.resetEnable();
-    }//GEN-LAST:event_formWindowClosing
 
     /**
      * @param args the command line arguments
@@ -529,7 +471,7 @@ private void saveFile(File selectedFile)
     private javax.swing.JFrame openFileFrame;
     private javax.swing.JButton removeBtn;
     private javax.swing.JFrame saveFileFrame;
-    private javax.swing.JList<String> submittedArea;
+    private javax.swing.JList<Cards> submittedArea;
     private javax.swing.JLabel submittedCardsLabel;
     // End of variables declaration//GEN-END:variables
 }
