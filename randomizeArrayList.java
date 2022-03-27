@@ -1,10 +1,10 @@
-public static int[] RandomizeArray(int[] myCard){
+public static int[] randomizeArrayList(int[] myCard){
         Random rgen = new Random();
-        for (int i=0; i<array.length; i++) {
-        int randomPosition = rgen.nextInt(array.length);
-        int temp = array[i];
-        array[i] = array[randomPosition];
-        array[randomPosition] = temp;
+        for (int i=0; i<ArrayList.length; i++) {
+        int randomPosition = rgen.nextInt(ArrayList.length);
+        int temp = ArrayList[i];
+        ArrayList[i] = ArrayList[randomPosition];
+        ArrayList[randomPosition] = temp;
         }
-        return array;
+        return ArrayList;
     }
