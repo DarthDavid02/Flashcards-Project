@@ -76,14 +76,4 @@ public class Cards {
         return ("Card " + cardNum  + " " + status);
     }
     //new code
-    public static int[] RandomizeArray(int[] myCard){
-        Random rgen = new Random();
-        for (int i=0; i<array.length; i++) {
-        int randomPosition = rgen.nextInt(array.length);
-        int temp = array[i];
-        array[i] = array[randomPosition];
-        array[randomPosition] = temp;
-        }
-        return array;
-    }
 }
