@@ -40,6 +40,8 @@
         </DimensionLayout>
       </Layout>
     </Container>
+    <Component class="javax.swing.ButtonGroup" name="sortGroup">
+    </Component>
     <Menu class="javax.swing.JMenuBar" name="jMenuBar1">
       <SubComponents>
         <Menu class="javax.swing.JMenu" name="jMenu1">
@@ -85,9 +87,17 @@
                 </MenuItem>
               </SubComponents>
             </Menu>
+            <MenuItem class="javax.swing.JMenuItem" name="saveRevistCards">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Save Checked Cards"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="saveRevistCardsActionPerformed"/>
+              </Events>
+            </MenuItem>
           </SubComponents>
         </Menu>
-        <Menu class="javax.swing.JMenu" name="cardMaker">
+        <Menu class="javax.swing.JMenu" name="optionMnu">
           <Properties>
             <Property name="text" type="java.lang.String" value="Options"/>
           </Properties>
@@ -100,37 +110,57 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cardMakerItemActionPerformed"/>
               </Events>
             </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="jMenuItem1">
+            <MenuItem class="javax.swing.JCheckBoxMenuItem" name="randmCards">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Randomize Cards"/>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="randmCardsActionPerformed"/>
+              </Events>
             </MenuItem>
-            <Menu class="javax.swing.JMenu" name="jMenu2">
+            <Menu class="javax.swing.JMenu" name="sortMnu">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Sort"/>
               </Properties>
               <SubComponents>
-                <MenuItem class="javax.swing.JRadioButtonMenuItem" name="jRadioButtonMenuItem1">
+                <MenuItem class="javax.swing.JRadioButtonMenuItem" name="noneRadio">
                   <Properties>
+                    <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                      <ComponentRef name="sortGroup"/>
+                    </Property>
                     <Property name="selected" type="boolean" value="true"/>
+                    <Property name="text" type="java.lang.String" value="None"/>
+                  </Properties>
+                </MenuItem>
+                <MenuItem class="javax.swing.JRadioButtonMenuItem" name="ascRadio">
+                  <Properties>
+                    <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                      <ComponentRef name="sortGroup"/>
+                    </Property>
                     <Property name="text" type="java.lang.String" value="Ascending"/>
                   </Properties>
                 </MenuItem>
-                <MenuItem class="javax.swing.JRadioButtonMenuItem" name="jRadioButtonMenuItem2">
+                <MenuItem class="javax.swing.JRadioButtonMenuItem" name="descRadio">
                   <Properties>
-                    <Property name="selected" type="boolean" value="true"/>
+                    <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                      <ComponentRef name="sortGroup"/>
+                    </Property>
                     <Property name="text" type="java.lang.String" value="Descending"/>
                   </Properties>
                 </MenuItem>
-                <MenuItem class="javax.swing.JRadioButtonMenuItem" name="jRadioButtonMenuItem3">
+                <MenuItem class="javax.swing.JRadioButtonMenuItem" name="mCardsFirstRadio">
                   <Properties>
-                    <Property name="selected" type="boolean" value="true"/>
+                    <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                      <ComponentRef name="sortGroup"/>
+                    </Property>
                     <Property name="text" type="java.lang.String" value="Marked Cards First"/>
                   </Properties>
                 </MenuItem>
-                <MenuItem class="javax.swing.JRadioButtonMenuItem" name="jRadioButtonMenuItem4">
+                <MenuItem class="javax.swing.JRadioButtonMenuItem" name="mCardsSecRadio">
                   <Properties>
-                    <Property name="selected" type="boolean" value="true"/>
+                    <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                      <ComponentRef name="sortGroup"/>
+                    </Property>
                     <Property name="text" type="java.lang.String" value="Marked Cards Second"/>
                   </Properties>
                 </MenuItem>
@@ -141,11 +171,13 @@
                 <Property name="text" type="java.lang.String" value="Timer"/>
               </Properties>
               <SubComponents>
-                <MenuItem class="javax.swing.JCheckBoxMenuItem" name="jCheckBoxMenuItem1">
+                <MenuItem class="javax.swing.JCheckBoxMenuItem" name="timerToggle">
                   <Properties>
-                    <Property name="selected" type="boolean" value="true"/>
                     <Property name="text" type="java.lang.String" value="Active"/>
                   </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="timerToggleActionPerformed"/>
+                  </Events>
                 </MenuItem>
               </SubComponents>
             </Menu>
@@ -190,7 +222,8 @@
                       <EmptySpace max="32767" attributes="0"/>
                       <Component id="nextBtn" min="-2" pref="153" max="-2" attributes="0"/>
                   </Group>
-                  <Component id="jScrollPane1" min="-2" pref="526" max="-2" attributes="0"/>
+                  <Component id="jScrollPane1" pref="526" max="32767" attributes="0"/>
+                  <Component id="timeBar" alignment="0" max="32767" attributes="0"/>
               </Group>
               <EmptySpace pref="52" max="32767" attributes="0"/>
           </Group>
@@ -199,7 +232,9 @@
     <DimensionLayout dim="1">
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="1" attributes="0">
-              <EmptySpace pref="41" max="32767" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="timeBar" min="-2" pref="25" max="-2" attributes="0"/>
+              <EmptySpace pref="13" max="32767" attributes="0"/>
               <Component id="jScrollPane1" min="-2" pref="255" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
@@ -207,7 +242,7 @@
                   <Component id="cardNumLabel" alignment="3" min="-2" pref="42" max="-2" attributes="0"/>
                   <Component id="prevBtn" alignment="3" min="-2" pref="42" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace min="-2" pref="38" max="-2" attributes="0"/>
+              <EmptySpace min="-2" pref="26" max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -275,5 +310,7 @@
         </Component>
       </SubComponents>
     </Container>
+    <Component class="javax.swing.JProgressBar" name="timeBar">
+    </Component>
   </SubComponents>
 </Form>

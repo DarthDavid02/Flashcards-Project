@@ -14,7 +14,7 @@ public class RevistCards
 {
     private ArrayList <Cards> original = new ArrayList<Cards>();
      
-    public ArrayList <Cards> getFilter()
+    public ArrayList <Cards> getOriginal()
     {
         return original;
     }
@@ -47,21 +47,6 @@ public class RevistCards
         
     }
     
-//    public ArrayList <Cards>  updateFilter()
-//    {
-//        ArrayList <Cards> filter = new ArrayList <Cards> ();
-//       for(int i = 0; i < original.size(); ++i)
-//        {
-//            if(original.get(i).isMarked())
-//            {
-//               filter.add(original.get(i));
-//               filter.get(filter.size()-1).setCardNum(filter.size());
-//            }                          
-//        }
-//       System.out.println(filter);
-//       return filter;
-//    }
-     
     public boolean anyMarked()
     {
         boolean anyMarked = false;

@@ -75,5 +75,4 @@ public class Cards {
     {
         return ("Card " + cardNum  + " " + status);
     }
-    //new code
 }

@@ -1,10 +1,10 @@
 
+import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.util.ArrayList;
 import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -24,6 +24,7 @@ public class CardMaker extends javax.swing.JFrame {
     private DefaultListModel <Cards> cardList = new DefaultListModel<Cards>();
     //original window reference
     private FlashCards quizWindow;
+    private static final String PLACEHOLDER = "This is Placeholder Text";
     /**
      * Creates new form CardMaker
      */
@@ -50,9 +51,11 @@ private void saveFile(File selectedFile)
     {
             try {
                 BufferedWriter writer = new BufferedWriter(new FileWriter(selectedFile + ".txt"));
+                
                 for(int i = 0; i < cardList.size(); i++) {
                     writer.write(cardList.getElementAt(i).getQuestion() + " /");
                     writer.write(cardList.getElementAt(i).getAnswer() + "\n");
+                    writer.write(cardList.getElementAt(i).isMarked() + "\n");
                 }
                 writer.close();
             } catch (Exception e) {
@@ -66,24 +69,22 @@ private void saveFile(File selectedFile)
     {    
         try {
             BufferedReader reader = new BufferedReader(new FileReader(selectedFile));
-            String question = reader.readLine();
-            String answer = "";
-            int seperator = 0;
-            while (question != null) {
-                for(int i=0; i < question.length(); ++i)
-                {
-                    if(question.charAt(i) == '/')
-                    {
-                        seperator = i;
-                        i=question.length();                        
-                    }
-                }
-                    answer = question.substring((seperator+1));  
-                    question = question.substring(0, (seperator-1));
-                    cardList.addElement(new Cards(question, answer));
+            String isMarked;
+            String line;
+            String [] info;
+            while ((line = reader.readLine()) != null) {
+                    info = line.split("/");
+                    cardList.addElement(new Cards(info[0], info[1]));
                     cardList.get(cardList.getSize()-1).setCardNum(cardList.size());
                     cardList.get(cardList.getSize()-1).setStatus("import succeeded");
-                    question = reader.readLine();
+                    if((isMarked = reader.readLine()).equalsIgnoreCase("true"))
+                    {
+                        cardList.get(cardList.size()-1).setMarked(true);
+                    }
+                    else if(isMarked.equalsIgnoreCase("false"))
+                    {
+                        cardList.get(cardList.size()-1).setMarked(false);
+                    }
                 }
                 reader.close();
             } catch (Exception e) {
@@ -113,20 +114,35 @@ private void saveFile(File selectedFile)
     {
         //adds new card to card list
         Cards myCard;
-         if(enterCardInfoQ.getText().equals("") || enterCardInfoA.getText().equals(""))
+        String question, answer;
+        
+        if(enterCardInfoQ.getText().equals("") ||enterCardInfoQ.getText().equals("\n"))
         {
-            myCard = new Cards("This is Placeholder Text", "This is Placeholder Text");
+            question = PLACEHOLDER;           
         }
         else
         {
-            myCard = new Cards(enterCardInfoQ.getText(), enterCardInfoA.getText());
+            question = enterCardInfoQ.getText();       
         }
+         
+         if(enterCardInfoA.getText().equals("") || enterCardInfoA.getText().equals("\n"))
+         {
+            answer = PLACEHOLDER;
+         }
+         else
+         {
+            answer = enterCardInfoA.getText();
+         }
+         myCard = new Cards(question, answer);
          cardList.addElement(myCard);
          cardList.get(cardList.size()-1).setCardNum(cardList.size());
          cardList.get(cardList.size()-1).setStatus("created");      
          submittedCardsLabel.setText("Cards: " + cardList.size());
          enterCardInfoQ.setText("");
          enterCardInfoA.setText("");
+         //makes sure most recently added card is visible
+         //scroll automatically when needed
+         submittedArea.ensureIndexIsVisible(cardList.getSize()-1);
     }
     
         private void editCard(Cards selectedCard)
@@ -140,15 +156,22 @@ private void saveFile(File selectedFile)
     private void addCard(Cards selectedCard)
     {
         //changes values of cards already in cardList
-         if(enterCardInfoQ.getText().equals("") || enterCardInfoA.getText().equals(""))
+        if(enterCardInfoQ.getText().equals("") || enterCardInfoQ.getText().equals("\n"))
         {
-            selectedCard.setQuestion("This is Placeholder Text");
-            selectedCard.setAnswer("This is Placeholder Text");
+           selectedCard.setQuestion(PLACEHOLDER);
         }
         else
         {
-            selectedCard.setQuestion(enterCardInfoQ.getText());
-            selectedCard.setAnswer(enterCardInfoA.getText());
+           selectedCard.setQuestion(enterCardInfoQ.getText());       
+        }
+         
+        if(enterCardInfoA.getText().equals("") || enterCardInfoA.getText().equals("\n"))
+        {
+           selectedCard.setAnswer(PLACEHOLDER);
+        }
+        else
+        {
+           selectedCard.setAnswer(enterCardInfoA.getText());
         }
         cardList.get((selectedCard.getCardNum()-1)).setStatus("updated");
         addBtn.setText("Add");
@@ -186,7 +209,6 @@ private void saveFile(File selectedFile)
 
         saveFileFrame.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         saveFileFrame.setTitle("Flash Card Maker");
-        saveFileFrame.setAlwaysOnTop(true);
 
         javax.swing.GroupLayout saveFileFrameLayout = new javax.swing.GroupLayout(saveFileFrame.getContentPane());
         saveFileFrame.getContentPane().setLayout(saveFileFrameLayout);
@@ -201,7 +223,6 @@ private void saveFile(File selectedFile)
 
         openFileFrame.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         openFileFrame.setTitle("Flash Card Maker");
-        openFileFrame.setAlwaysOnTop(true);
 
         javax.swing.GroupLayout openFileFrameLayout = new javax.swing.GroupLayout(openFileFrame.getContentPane());
         openFileFrame.getContentPane().setLayout(openFileFrameLayout);
@@ -216,7 +237,6 @@ private void saveFile(File selectedFile)
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Flash Card Maker");
-        setAlwaysOnTop(true);
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
                 formWindowClosing(evt);
@@ -234,6 +254,11 @@ private void saveFile(File selectedFile)
         enterCardInfoQ.setRows(5);
         enterCardInfoQ.setWrapStyleWord(true);
         enterCardInfoQ.setMargin(new java.awt.Insets(35, 35, 35, 35));
+        enterCardInfoQ.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                enterCardInfoQKeyPressed(evt);
+            }
+        });
         jScrollPane2.setViewportView(enterCardInfoQ);
 
         submittedCardsLabel.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
@@ -247,6 +272,11 @@ private void saveFile(File selectedFile)
         enterCardInfoA.setRows(5);
         enterCardInfoA.setWrapStyleWord(true);
         enterCardInfoA.setMargin(new java.awt.Insets(35, 35, 35, 35));
+        enterCardInfoA.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                enterCardInfoAKeyPressed(evt);
+            }
+        });
         jScrollPane3.setViewportView(enterCardInfoA);
 
         AnswerLabel.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
@@ -300,22 +330,27 @@ private void saveFile(File selectedFile)
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addGap(26, 26, 26)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(QuestionLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(AnswerLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(32, 32, 32)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(submittedCardsLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 172, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(addBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(removeBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
-                .addContainerGap(32, Short.MAX_VALUE))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(AnswerLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 32, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(QuestionLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(submittedCardsLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                            .addComponent(addBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(removeBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(30, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -325,20 +360,20 @@ private void saveFile(File selectedFile)
                     .addComponent(submittedCardsLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(QuestionLabel))
                 .addGap(11, 11, 11)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 496, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jScrollPane5)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(addBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(removeBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 265, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGap(18, 18, 18)
                         .addComponent(AnswerLabel)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 265, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(33, Short.MAX_VALUE))
+                .addGap(22, 22, 22))
         );
 
         pack();
@@ -386,7 +421,7 @@ private void saveFile(File selectedFile)
         // TODO add your handling code here:
         removeCard(submittedArea.getSelectedValue());
         removeBtn.setVisible(isEditing);
-        submittedArea.clearSelection();
+        
     }//GEN-LAST:event_removeBtnActionPerformed
    
     private void addBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addBtnActionPerformed
@@ -394,7 +429,7 @@ private void saveFile(File selectedFile)
         if(isEditing)
         {
             addCard(submittedArea.getSelectedValue());
-            removeBtn.setVisible(isEditing);
+            removeBtn.setVisible(isEditing);     
         }
         else
         {
@@ -412,13 +447,45 @@ private void saveFile(File selectedFile)
         if(!cardList.isEmpty())
         {
             editCard(submittedArea.getSelectedValue());
-            removeBtn.setVisible(isEditing);
+            removeBtn.setVisible(isEditing);        
         }
         else
         {
             JOptionPane.showMessageDialog(null, "Error: No cards are in the list", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_submittedAreaMousePressed
+
+    private void enterCardInfoQKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_enterCardInfoQKeyPressed
+        // TODO add your handling code here:
+        if(evt.getKeyCode() == KeyEvent.VK_ENTER)
+        {
+            if(isEditing)
+            {
+                addCard(submittedArea.getSelectedValue());
+                removeBtn.setVisible(isEditing);
+            }
+            else
+            {
+                addCard();
+            }    
+        }
+    }//GEN-LAST:event_enterCardInfoQKeyPressed
+
+    private void enterCardInfoAKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_enterCardInfoAKeyPressed
+        // TODO add your handling code here:
+        if(evt.getKeyCode() == KeyEvent.VK_ENTER)
+        {
+            if(isEditing)
+            {
+                addCard(submittedArea.getSelectedValue());
+                removeBtn.setVisible(isEditing);
+            }
+            else
+            {
+                addCard();
+            }    
+        }
+    }//GEN-LAST:event_enterCardInfoAKeyPressed
 
     /**
      * @param args the command line arguments

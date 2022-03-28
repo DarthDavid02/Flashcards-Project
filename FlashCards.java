@@ -5,7 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
-import javax.swing.DefaultListModel;
+import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
@@ -33,12 +33,15 @@ public class FlashCards extends javax.swing.JFrame {
     private int cardCount = 0;
     boolean isFlipped = false;
     //reference to quiz window to be sent to cardMaker window
-    private FlashCards ref;
+    private Timer barTimer;
+    private File currentFile;
     
     public FlashCards() {
         initComponents();
         //makeCardList();
        this.clearDisplayFrame();
+       timeBar.setVisible(false);
+       sortMnu.setVisible(false);
     }
     //Since the display and maker frames share an ArrayList, this clears and resets the frame
     //that displays the flashcards
@@ -52,6 +55,10 @@ public class FlashCards extends javax.swing.JFrame {
        flashCards.clear();
     }
 
+    public int getCardCount()
+    {
+        return cardCount;
+    }
     private void clearRevisit()
     {
         revistChk.setSelected(false);
@@ -97,11 +104,13 @@ public class FlashCards extends javax.swing.JFrame {
 
         saveFileFrame = new javax.swing.JFrame();
         openFileFrame = new javax.swing.JFrame();
+        sortGroup = new javax.swing.ButtonGroup();
         prevBtn = new javax.swing.JButton();
         nextBtn = new javax.swing.JButton();
         cardNumLabel = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         flashCardBtn = new javax.swing.JTextArea();
+        timeBar = new javax.swing.JProgressBar();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         openMenuItem = new javax.swing.JMenuItem();
@@ -109,16 +118,18 @@ public class FlashCards extends javax.swing.JFrame {
         revistChk = new javax.swing.JCheckBoxMenuItem();
         markedCardRevistMnu = new javax.swing.JMenu();
         showRevisitOnlyChk = new javax.swing.JCheckBoxMenuItem();
-        cardMaker = new javax.swing.JMenu();
+        saveRevistCards = new javax.swing.JMenuItem();
+        optionMnu = new javax.swing.JMenu();
         cardMakerItem = new javax.swing.JMenuItem();
-        jMenuItem1 = new javax.swing.JMenuItem();
-        jMenu2 = new javax.swing.JMenu();
-        jRadioButtonMenuItem1 = new javax.swing.JRadioButtonMenuItem();
-        jRadioButtonMenuItem2 = new javax.swing.JRadioButtonMenuItem();
-        jRadioButtonMenuItem3 = new javax.swing.JRadioButtonMenuItem();
-        jRadioButtonMenuItem4 = new javax.swing.JRadioButtonMenuItem();
+        randmCards = new javax.swing.JCheckBoxMenuItem();
+        sortMnu = new javax.swing.JMenu();
+        noneRadio = new javax.swing.JRadioButtonMenuItem();
+        ascRadio = new javax.swing.JRadioButtonMenuItem();
+        descRadio = new javax.swing.JRadioButtonMenuItem();
+        mCardsFirstRadio = new javax.swing.JRadioButtonMenuItem();
+        mCardsSecRadio = new javax.swing.JRadioButtonMenuItem();
         jMenu3 = new javax.swing.JMenu();
-        jCheckBoxMenuItem1 = new javax.swing.JCheckBoxMenuItem();
+        timerToggle = new javax.swing.JCheckBoxMenuItem();
 
         saveFileFrame.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         saveFileFrame.setTitle("Export");
@@ -222,9 +233,17 @@ public class FlashCards extends javax.swing.JFrame {
 
         markedCardsMnu.add(markedCardRevistMnu);
 
+        saveRevistCards.setText("Save Checked Cards");
+        saveRevistCards.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                saveRevistCardsActionPerformed(evt);
+            }
+        });
+        markedCardsMnu.add(saveRevistCards);
+
         jMenuBar1.add(markedCardsMnu);
 
-        cardMaker.setText("Options");
+        optionMnu.setText("Options");
 
         cardMakerItem.setText("Make Flash Cards");
         cardMakerItem.addActionListener(new java.awt.event.ActionListener() {
@@ -232,40 +251,54 @@ public class FlashCards extends javax.swing.JFrame {
                 cardMakerItemActionPerformed(evt);
             }
         });
-        cardMaker.add(cardMakerItem);
+        optionMnu.add(cardMakerItem);
 
-        jMenuItem1.setText("Randomize Cards");
-        cardMaker.add(jMenuItem1);
+        randmCards.setText("Randomize Cards");
+        randmCards.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                randmCardsActionPerformed(evt);
+            }
+        });
+        optionMnu.add(randmCards);
 
-        jMenu2.setText("Sort");
+        sortMnu.setText("Sort");
 
-        jRadioButtonMenuItem1.setSelected(true);
-        jRadioButtonMenuItem1.setText("Ascending");
-        jMenu2.add(jRadioButtonMenuItem1);
+        sortGroup.add(noneRadio);
+        noneRadio.setSelected(true);
+        noneRadio.setText("None");
+        sortMnu.add(noneRadio);
 
-        jRadioButtonMenuItem2.setSelected(true);
-        jRadioButtonMenuItem2.setText("Descending");
-        jMenu2.add(jRadioButtonMenuItem2);
+        sortGroup.add(ascRadio);
+        ascRadio.setText("Ascending");
+        sortMnu.add(ascRadio);
 
-        jRadioButtonMenuItem3.setSelected(true);
-        jRadioButtonMenuItem3.setText("Marked Cards First");
-        jMenu2.add(jRadioButtonMenuItem3);
+        sortGroup.add(descRadio);
+        descRadio.setText("Descending");
+        sortMnu.add(descRadio);
 
-        jRadioButtonMenuItem4.setSelected(true);
-        jRadioButtonMenuItem4.setText("Marked Cards Second");
-        jMenu2.add(jRadioButtonMenuItem4);
+        sortGroup.add(mCardsFirstRadio);
+        mCardsFirstRadio.setText("Marked Cards First");
+        sortMnu.add(mCardsFirstRadio);
 
-        cardMaker.add(jMenu2);
+        sortGroup.add(mCardsSecRadio);
+        mCardsSecRadio.setText("Marked Cards Second");
+        sortMnu.add(mCardsSecRadio);
+
+        optionMnu.add(sortMnu);
 
         jMenu3.setText("Timer");
 
-        jCheckBoxMenuItem1.setSelected(true);
-        jCheckBoxMenuItem1.setText("Active");
-        jMenu3.add(jCheckBoxMenuItem1);
+        timerToggle.setText("Active");
+        timerToggle.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                timerToggleActionPerformed(evt);
+            }
+        });
+        jMenu3.add(timerToggle);
 
-        cardMaker.add(jMenu3);
+        optionMnu.add(jMenu3);
 
-        jMenuBar1.add(cardMaker);
+        jMenuBar1.add(optionMnu);
 
         setJMenuBar(jMenuBar1);
 
@@ -282,20 +315,23 @@ public class FlashCards extends javax.swing.JFrame {
                         .addComponent(cardNumLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(nextBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 153, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 526, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 526, Short.MAX_VALUE)
+                    .addComponent(timeBar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(52, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(41, Short.MAX_VALUE)
+                .addContainerGap()
+                .addComponent(timeBar, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 13, Short.MAX_VALUE)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 255, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(nextBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(cardNumLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(prevBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(38, 38, 38))
+                .addGap(26, 26, 26))
         );
 
         pack();
@@ -306,52 +342,92 @@ public class FlashCards extends javax.swing.JFrame {
         --cardCount;
         //resets isFlipped variable to reflect that the question should be showing for new card
         isFlipped = false;
-        showCard(0, flashCards.get(cardCount));
+        if(timerToggle.isSelected())
+        {  
+            revistChk.setSelected(flashCards.get(cardCount).isMarked());
+            cardNumLabel.setText(flashCards.get(cardCount).getCardNum() + "/" + flashCards.size());
+            flashCardBtn.setText("");
+            timeBar.setValue(timeBar.getMaximum());
+        }
+        else
+        {
+            showCard(0, flashCards.get(cardCount));
+        }
         checkVis();
     }//GEN-LAST:event_prevBtnActionPerformed
 
+    public JButton getPrev()
+    {
+        return prevBtn;
+    }
+    public JButton getNext()
+    {
+        return nextBtn;
+    }
     private void nextBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nextBtnActionPerformed
         // TODO add your handling code here:
         ++cardCount;
         //resets isFlipped variable to reflect that the question should be showing for new card
         isFlipped = false;
-        showCard(0, flashCards.get(cardCount));
+        if(timerToggle.isSelected())
+        {   
+            revistChk.setSelected(flashCards.get(cardCount).isMarked());
+            cardNumLabel.setText(flashCards.get(cardCount).getCardNum() + "/" + flashCards.size());
+            flashCardBtn.setText("");
+            timeBar.setValue(timeBar.getMaximum());
+        }
+        else
+        {
+            isFlipped = false;
+            showCard(0, flashCards.get(cardCount));            
+        }
         checkVis();
     }//GEN-LAST:event_nextBtnActionPerformed
 
     private void flashCardBtnMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_flashCardBtnMousePressed
         // TODO add your handling code here:
-        if(isFlipped)
+        if(timerToggle.isSelected() && flashCardBtn.getText().equals("") && !isFlipped)
         {
-            isFlipped = false;
+             isFlipped = false;
+             prevBtn.setEnabled(false);
+             nextBtn.setEnabled(false);
             if(!flashCards.isEmpty())
             {
-                showCard(0, flashCards.get(cardCount));
-            }           
+                this.showCard(0, flashCards.get(cardCount));
+                barTimer.timer(timeBar, this, flashCards);               
+            }
         }
         else
         {
-            isFlipped = true;
-             if(!flashCards.isEmpty())
+            if(isFlipped)
             {
-                 showCard(1, flashCards.get(cardCount));
-            }          
+                isFlipped = false;
+                if(!flashCards.isEmpty())
+                {
+                    showCard(0, flashCards.get(cardCount));
+                }           
+            }
+            else
+            {
+                isFlipped = true;
+                 prevBtn.setEnabled(true);
+                 nextBtn.setEnabled(true);
+                if(!flashCards.isEmpty())
+                {
+                    showCard(1, flashCards.get(cardCount));
+                }          
+            }
+           
         }
     }//GEN-LAST:event_flashCardBtnMousePressed
 
-    //makes class window object same as the local window object in main 
-    //so it can be referenced and passed to cardMaker class/frame
-    public void setRef(FlashCards mainObject)
-    {
-        ref = mainObject;
-    }
     //opens the frame that will allow a user to make and save flash cards
     private void cardMakerItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cardMakerItemActionPerformed
         // TODO add your handling code here:
         //creates an object for the card maker class to open the frame to make cards
         CardMaker myCards = new CardMaker();
         //passing a refernce to CardMaker Class back to this class
-        myCards.setWindowRef(ref);
+        myCards.setWindowRef(this);
         //opening the CardMaker
         myCards.setVisible(true);
          //instead of closing it, make it so user can't use flashcards till cardMaker frame closes
@@ -379,7 +455,17 @@ public class FlashCards extends javax.swing.JFrame {
             readFile(fileLoad.getSelectedFile());
             checkVis();
             cardNumLabel.setVisible(true);
-            showCard(0,flashCards.get(0));
+            if(timerToggle.isSelected())
+            {           
+                revistChk.setSelected(flashCards.get(cardCount).isMarked());
+                cardNumLabel.setText(flashCards.get(cardCount).getCardNum() + "/" + flashCards.size());
+                flashCardBtn.setText("");
+                timeBar.setValue(timeBar.getMaximum());
+            }
+            else
+            {
+                showCard(0,flashCards.get(0));
+            }
             filter.setFilter(flashCards);
         }          
     }//GEN-LAST:event_openMenuItemActionPerformed
@@ -427,7 +513,7 @@ public class FlashCards extends javax.swing.JFrame {
         else if(!showRevisitOnlyChk.isSelected())
         {           
                 this.clearDisplayFrame();
-                flashCards.addAll(filter.getFilter());              
+                flashCards.addAll(filter.getOriginal());              
                //resets card numbers for when marked only mode is turned off
                filter.resetCardNumbering(flashCards);
                this.updateDisplay();           
@@ -439,33 +525,98 @@ public class FlashCards extends javax.swing.JFrame {
                   
     }//GEN-LAST:event_showRevisitOnlyChkActionPerformed
 
+    private void timerToggleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_timerToggleActionPerformed
+        // TODO add your handling code here:
+        if(timerToggle.isSelected())
+        {
+            //The number taken by timer constructor is length of time
+            //you want it to last in seconds (30 = 30 seconds)
+            barTimer = new Timer(30);
+            JOptionPane.showMessageDialog(null, "You have enabled the timer, click the \ncard to reveal the Question and start the timer. \n"
+                    + "The card will flip after the time runs out, or if the card is clicked normally.", "Timer Activated", JOptionPane.INFORMATION_MESSAGE);
+            timeBar.setVisible(true);
+            flashCardBtn.setText("");
+            isFlipped = false;
+        }
+        else
+        {
+            prevBtn.setEnabled(true);
+            nextBtn.setEnabled(true);
+            timeBar.setVisible(false);
+        }
+    }//GEN-LAST:event_timerToggleActionPerformed
+
+    private void randmCardsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_randmCardsActionPerformed
+        // TODO add your handling code here:
+        if(randmCards.isSelected())
+        {
+            randomizeArrayList random = new randomizeArrayList();
+            random.randomize(flashCards);
+            filter.resetCardNumbering(flashCards);
+            this.updateDisplay();
+        }
+        else
+        {
+            flashCards.clear();
+            flashCards.addAll(filter.getOriginal());
+            filter.resetCardNumbering(flashCards);
+            this.updateDisplay();
+        }
+    }//GEN-LAST:event_randmCardsActionPerformed
+
+    private void saveRevistCardsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveRevistCardsActionPerformed
+        // TODO add your handling code here:
+        
+        saveFile(currentFile);
+        JOptionPane.showMessageDialog(null, "Cards marked for Revist updated in file", "Updated Cards", JOptionPane.INFORMATION_MESSAGE);
+
+    }//GEN-LAST:event_saveRevistCardsActionPerformed
+
     private void readFile(File selectedFile) 
     {    
         try {
             BufferedReader reader = new BufferedReader(new FileReader(selectedFile));
-            String question = reader.readLine();
-            String answer = "";
-            int seperator = 0;
-            while (question != null) {
-                for(int i=0; i < question.length(); ++i)
-                {
-                    if(question.charAt(i) == '/')
-                    {
-                        seperator = i;
-                        i=question.length();                        
-                    }
-                }
-                    answer = question.substring((seperator+1));  
-                    question = question.substring(0, (seperator-1));
-                    flashCards.add(new Cards(question, answer));
+            String line;
+            String isMarked = "";
+            String [] info; 
+            currentFile = selectedFile;
+            while ((line = reader.readLine()) != null) {
+                    info = line.split("/");
+                    flashCards.add(new Cards(info[0], info[1]));
                     flashCards.get(flashCards.size()-1).setCardNum(flashCards.size());
-                    question = reader.readLine();
+
+                    if((isMarked = reader.readLine()).equalsIgnoreCase("true"))
+                    {
+                        flashCards.get(flashCards.size()-1).setMarked(true);
+                    }
+                    else if(isMarked.equalsIgnoreCase("false"))
+                    {
+                        flashCards.get(flashCards.size()-1).setMarked(false);
+                    }
                 }
                 reader.close();
             } catch (Exception e) {
                 //System.out.println("Error: Couldn't read to file.");
                 JOptionPane.showMessageDialog(null, "Error: Couldn't read file.", "Error", JOptionPane.ERROR_MESSAGE);
             }        
+    }
+    
+    private void saveFile(File selectedFile) 
+    {
+            try {
+                BufferedWriter writer = new BufferedWriter(new FileWriter(selectedFile));
+                for(int i = 0; i < flashCards.size(); i++) {
+                    writer.write(flashCards.get(i).getQuestion() + " /");
+                    writer.write(flashCards.get(i).getAnswer() + "\n");
+                    writer.write(flashCards.get(i).isMarked() + "\n");
+                    
+                }
+                writer.close();
+            } catch (Exception e) {
+                //System.out.println("Error: Couldn't write to file.");
+                JOptionPane.showMessageDialog(null, "Error: Couldn't write to file.", "Error", JOptionPane.ERROR_MESSAGE);
+                e.printStackTrace();
+            }
     }
       
     /**
@@ -498,37 +649,39 @@ public class FlashCards extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                FlashCards myWindow = new FlashCards();
-                myWindow.setRef(myWindow);
-                myWindow.setVisible(true);             
+                new FlashCards().setVisible(true);          
             }
         });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JMenu cardMaker;
+    private javax.swing.JRadioButtonMenuItem ascRadio;
     private javax.swing.JMenuItem cardMakerItem;
     private javax.swing.JLabel cardNumLabel;
+    private javax.swing.JRadioButtonMenuItem descRadio;
     private javax.swing.JTextArea flashCardBtn;
-    private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItem1;
     private javax.swing.JMenu jMenu1;
-    private javax.swing.JMenu jMenu2;
     private javax.swing.JMenu jMenu3;
     private javax.swing.JMenuBar jMenuBar1;
-    private javax.swing.JMenuItem jMenuItem1;
-    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem1;
-    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem2;
-    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem3;
-    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuItem4;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JRadioButtonMenuItem mCardsFirstRadio;
+    private javax.swing.JRadioButtonMenuItem mCardsSecRadio;
     private javax.swing.JMenu markedCardRevistMnu;
     private javax.swing.JMenu markedCardsMnu;
     private javax.swing.JButton nextBtn;
+    private javax.swing.JRadioButtonMenuItem noneRadio;
     private javax.swing.JFrame openFileFrame;
     private javax.swing.JMenuItem openMenuItem;
+    private javax.swing.JMenu optionMnu;
     private javax.swing.JButton prevBtn;
+    private javax.swing.JCheckBoxMenuItem randmCards;
     private javax.swing.JCheckBoxMenuItem revistChk;
     private javax.swing.JFrame saveFileFrame;
+    private javax.swing.JMenuItem saveRevistCards;
     private javax.swing.JCheckBoxMenuItem showRevisitOnlyChk;
+    private javax.swing.ButtonGroup sortGroup;
+    private javax.swing.JMenu sortMnu;
+    private javax.swing.JProgressBar timeBar;
+    private javax.swing.JCheckBoxMenuItem timerToggle;
     // End of variables declaration//GEN-END:variables
 }

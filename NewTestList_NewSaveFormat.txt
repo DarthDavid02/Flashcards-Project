@@ -1,0 +1,10 @@
+4 + 4 =   /8
+false
+What is the menaing of life?  /42
+false
+Who's the best?  /You are!
+false
+What does glados give you that may or may not be real?  /The cake is a lie
+false
+What are you using?  /Well, of course, it's a program
+false
