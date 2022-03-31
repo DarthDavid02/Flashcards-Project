@@ -531,7 +531,7 @@ public class FlashCards extends javax.swing.JFrame {
         {
             //The number taken by timer constructor is length of time
             //you want it to last in seconds (30 = 30 seconds)
-            barTimer = new Timer(30);
+            barTimer = new Timer(20);
             JOptionPane.showMessageDialog(null, "You have enabled the timer, click the \ncard to reveal the Question and start the timer. \n"
                     + "The card will flip after the time runs out, or if the card is clicked normally.", "Timer Activated", JOptionPane.INFORMATION_MESSAGE);
             timeBar.setVisible(true);
