@@ -24,7 +24,7 @@ public class CardMaker extends javax.swing.JFrame {
     private DefaultListModel <Cards> cardList = new DefaultListModel<Cards>();
     //original window reference
     private FlashCards quizWindow;
-    private static final String PLACEHOLDER = "This is Placeholder Text";
+    private static final String PLACEHOLDER = "Enter Text Here";
     /**
      * Creates new form CardMaker
      */
